@@ -4,7 +4,11 @@
 
 void driveEnum()
 {
+  char* finalOutput;
+  char temp[2048];
   char buf[MAX_PATH];
+  int dType;
+  char* dTypeStr;
   DWORD bufSize = GetLogicalDriveStrings(MAX_PATH, buf);
   if(bufSize <= 0)
   {
@@ -16,15 +20,47 @@ void driveEnum()
   }
   
   char* drive = buf;
+  printf("TEST: %s", buf);
   while(*drive != '\0')
   {
-    printf("Drive: %s\n", drive);
+    type = GetDriveType(drive);
+    switch(type)
+    {
+      case DRIVE_UNKNOWN:
+        dTypeStr = "Unknown";
+        break;
+      case NO_ROOT_DIR:
+        dTypeStr = "Invalid root directory ⚠️";
+        break;
+      case DRIVE_REMOVABLE:
+        dTypeStr = "Removable drive 💾";
+        break;
+      case DRIVE_FIXED:
+        dTypeStr = "Fixed drive (HDD/SSD, etc.) ";
+        break;
+      case DRIVE_REMOTE:
+        dTypeStr = "Network drive 🌐";
+        break;
+      case DRIVE_CDROM:
+        dTypeStr = "CD-ROM 💿";
+        break;
+      case DRIVE_RAMDISK:
+        dTypeStr = "RAM disk";
+        break;
+      default:
+        dTypeStr = "Unknown ❓";
+        break;
+    }
+    snprintf(temp, sizeof(temp), "Drive: %s | Type: %s", drive, dTypeStr);
+    strcat(finalOutput, sizeof(finalOutput), temp);
+
     drive += strlen(drive) + 1;
   }
 }
 
 int main()
 {
+  char* webhookMsg;
   driveEnum();
   return 0;
 }
