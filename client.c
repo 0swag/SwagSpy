@@ -4,7 +4,7 @@
 
 void driveEnum()
 {
-  char* finalOutput;
+  char finalOutput[2048];
   char temp[2048];
   char buf[MAX_PATH];
   int dType;
@@ -14,22 +14,17 @@ void driveEnum()
   {
     printf("error getting drives\n");
   }
-  else 
-  {
-    printf("SIZE: %d\n", bufSize);
-  }
   
   char* drive = buf;
-  printf("TEST: %s", buf);
   while(*drive != '\0')
   {
-    type = GetDriveType(drive);
-    switch(type)
+    dType = GetDriveType(drive);
+    switch(dType)
     {
       case DRIVE_UNKNOWN:
-        dTypeStr = "Unknown";
+        dTypeStr = "Unknown ❓";
         break;
-      case NO_ROOT_DIR:
+      case DRIVE_NO_ROOT_DIR:
         dTypeStr = "Invalid root directory ⚠️";
         break;
       case DRIVE_REMOVABLE:
@@ -51,11 +46,12 @@ void driveEnum()
         dTypeStr = "Unknown ❓";
         break;
     }
-    snprintf(temp, sizeof(temp), "Drive: %s | Type: %s", drive, dTypeStr);
-    strcat(finalOutput, sizeof(finalOutput), temp);
+    snprintf(temp, sizeof(temp), "Drive: %s | Type: %s\n", drive, dTypeStr);
+    strcat(finalOutput, temp);
 
     drive += strlen(drive) + 1;
   }
+  printf("%s", finalOutput);
 }
 
 int main()
