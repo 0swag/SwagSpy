@@ -4,12 +4,17 @@
 
 char* sysInfo()
 {
+  //cpuinfo vars
   char cpuInfo[256];
-  
+  HKEY hKey;
+  DWORD bufferSize = sizeof(cpuInfo);
+
+  //os version vars
   OSVERSIONINFO osvi;
   ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
 
   char* finalOutput = (char*)malloc(2048);
+  //pcname vars
   char temp[2048];
   char computerName[MAX_COMPUTERNAME_LENGTH + 1];
   DWORD size = sizeof(computerName);
@@ -22,8 +27,18 @@ char* sysInfo()
 
   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
   GetVersionEx(&osvi);
-  snprintf(temp, sizeof(temp), "Windows %d.%d Build %d", osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
+  snprintf(temp, sizeof(temp), "Windows %d.%d Build %d\n", osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
   strcat(finalOutput, temp);
+
+  if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+  {
+    if(RegQueryValueEx(hKey, "ProcessorNameString", 0, 0, (LPBYTE)cpuInfo, &bufferSize) == ERROR_SUCCESS)
+    {
+      RegCloseKey(hKey);
+      snprintf(temp, sizeof(temp), "CPU: %s\n", cpuInfo);
+      strcat(finalOutput, temp);
+    }
+  }
   
   return finalOutput;
 }
