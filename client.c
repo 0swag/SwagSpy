@@ -1,6 +1,8 @@
+#define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 #include <stdio.h>
 #include <strings.h>
+#include <stdlib.h>
 
 void handleOut(char* o)
 {
@@ -10,6 +12,10 @@ void handleOut(char* o)
 
 char* sysInfo()
 {
+  // memory info vars
+  MEMORYSTATUSEX memStatus;
+  memStatus.dwLength = sizeof(memStatus);
+
   //cpuinfo vars
   char cpuInfo[256];
   HKEY hKey;
@@ -45,7 +51,12 @@ char* sysInfo()
       strcat(finalOutput, temp);
     }
   }
-  
+  // gettttt raaaaam
+  if(GlobalMemoryStatusEx(&memStatus))
+  {
+    snprintf(temp, sizeof(temp), "Total physical memory: %.2fGB\nFree physical memory: %.2fGB\nTotal virtual memory: %.2fGB\nFree virtual memory: %.2fGB\n", (double)memStatus.ullTotalPhys / (1024 * 1024 * 1024), (double)memStatus.ullAvailPhys / (1024 * 1024 * 1024), (double)memStatus.ullTotalVirtual / (1024 * 1024 * 1024), (double)memStatus.ullAvailVirtual / (1024 * 1024 * 1024));
+    strcat(finalOutput, temp);
+  }
   return finalOutput;
 }
 
@@ -113,7 +124,7 @@ char* driveEnum()
 
     if(GetDiskFreeSpaceEx(drive, &totUserBytes, &totBytes, &totFreeBytes) != 0)
     {
-      snprintf(temp, sizeof(temp), "\t\tFree space for %s: %.fGB\n\t\tTotal GB: %.fGB\n\t\tTotal free GB: %.fGB\n", username, (double)totUserBytes.QuadPart / (1024 * 1024 * 1024), (double)totBytes.QuadPart / (1024 * 1024 * 1024), (double)totFreeBytes.QuadPart / (1024 * 1024 * 1024));
+      snprintf(temp, sizeof(temp), "\t\tFree space for %s: %.2fGB\n\t\tTotal GB: %.2fGB\n\t\tTotal free GB: %.2fGB\n", username, (double)totUserBytes.QuadPart / (1024 * 1024 * 1024), (double)totBytes.QuadPart / (1024 * 1024 * 1024), (double)totFreeBytes.QuadPart / (1024 * 1024 * 1024));
       strcat(finalOutput, temp);
     }
 
