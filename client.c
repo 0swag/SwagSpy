@@ -2,6 +2,12 @@
 #include <stdio.h>
 #include <strings.h>
 
+void handleOut(char* o)
+{
+  // replace this with your own exfiltration logic 
+  printf("%s", o);
+}
+
 char* sysInfo()
 {
   //cpuinfo vars
@@ -45,6 +51,20 @@ char* sysInfo()
 
 char* driveEnum()
 {
+  // get username
+
+  char username[256];
+  DWORD usernameSize = sizeof(username);
+
+  if(GetUserName(username, &usernameSize))
+  {
+    ;
+  }
+
+  ULARGE_INTEGER totUserBytes;
+  ULARGE_INTEGER totBytes;
+  ULARGE_INTEGER totFreeBytes;
+
   char* finalOutput = (char*)malloc(2048);
   ZeroMemory(finalOutput, 2048);
   char temp[2048];
@@ -54,7 +74,7 @@ char* driveEnum()
   DWORD bufSize = GetLogicalDriveStrings(MAX_PATH, buf);
   if(bufSize <= 0)
   {
-    printf("error getting drives\n");
+    ExitProcess(1);
   }
   
   char* drive = buf;
@@ -91,6 +111,12 @@ char* driveEnum()
     snprintf(temp, sizeof(temp), "Drive: %s | Type: %s\n", drive, dTypeStr);
     strcat(finalOutput, temp);
 
+    if(GetDiskFreeSpaceEx(drive, &totUserBytes, &totBytes, &totFreeBytes) != 0)
+    {
+      snprintf(temp, sizeof(temp), "\t\tFree space for %s: %.fGB\n\t\tTotal GB: %.fGB\n\t\tTotal free GB: %.fGB\n", username, (double)totUserBytes.QuadPart / (1024 * 1024 * 1024), (double)totBytes.QuadPart / (1024 * 1024 * 1024), (double)totFreeBytes.QuadPart / (1024 * 1024 * 1024));
+      strcat(finalOutput, temp);
+    }
+
     drive += strlen(drive) + 1;
   }
   return finalOutput;
@@ -100,9 +126,10 @@ int main()
 {
   char* systeminfo = sysInfo();
   char* drives = driveEnum();
-  printf("%s", drives);
-  printf("%s", systeminfo);
+  handleOut(drives);
+  handleOut(systeminfo);
   free(systeminfo);
   free(drives);
+  Sleep(10);
   return 0;
 }
